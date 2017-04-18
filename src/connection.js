@@ -55,7 +55,7 @@ class Connection extends EventEmitter {
     
     parseData(line) {
         debug(` -> ${line}`);
-        const match = /(:[^ ]+ )?([A-Za-z0-9]+) (.+)?/.exec(line);
+        const match = /(:[^ ]+ )?([A-Za-z0-9]+)( .+)?/.exec(line);
         if (match) {
             const msg = {
                 prefix: match[1], //prefix comes up to the first space
