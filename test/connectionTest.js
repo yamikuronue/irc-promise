@@ -94,6 +94,11 @@ describe('Connection', () => {
             con.handleData(new Buffer('This is a line\r\n'));
             return con.parseData.should.have.been.calledWith('This is a line');
         });
+
+        it('shouldn\'t barf on nulls', () => {
+            con.handleData(null);
+            return con.should.be.ok;
+        });
         
         it('should parse two lines', () => {
             con.handleData(new Buffer('This is a line\r\nThis is another line\r\n'));
@@ -111,6 +116,13 @@ describe('Connection', () => {
             con.handleData(new Buffer('This is a line with half a linebreak\r'));
             con.handleData(new Buffer('\n'));
             con.parseData.should.have.been.calledWith('This is a line with half a linebreak');
+        });
+
+        it('should parse a character across chunks', () => {
+            con.handleData(new Buffer([0xC2]));
+            con.handleData(new Buffer([0xA2]));
+            con.handleData(Buffer.from('\r\n'));
+            con.parseData.should.have.been.calledWith('¢');
         });
     });
     

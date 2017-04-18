@@ -6,6 +6,8 @@ const net = require('net');
 const EventEmitter = require('events').EventEmitter;
 const os = require('os');
 
+const LF = 10;
+
 class Connection extends EventEmitter {
     constructor(options) {
         super();
@@ -34,12 +36,14 @@ class Connection extends EventEmitter {
     }
     
     handleData(data) {
-        let chunk = data.toString('utf8');
-        this.buffer += chunk;
+        if (!data) return;
+        this.buffer = Buffer.concat([this.buffer,data]);
         
-        let lines = this.buffer.split('\r\n');
-        this.buffer = lines.pop();                  //Anything that doesn't end in a linebreak goes back on the buffer
-        lines.map((line) => this.parseData(line));
+        if (this.buffer.indexOf(LF) > -1) { //check for a line feed character
+            let lines = this.buffer.toString('utf8').split('\r\n'); //only split on CRLF
+            this.buffer = lines.pop();                  //Anything that doesn't end in a linebreak goes back on the buffer
+            lines.map((line) => this.parseData(line));
+        }
     }
     
     send(line) {
